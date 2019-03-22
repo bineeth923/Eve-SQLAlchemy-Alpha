@@ -65,7 +65,13 @@ def custom_sqla_obj_to_dict(obj, sqla_obj=None, fields=None, resource=None, embe
     for field in map(lambda f: f.split('.', 1)[0], fields):
         try:
             val = obj.__getattribute__(field)
-
+            if not (isinstance(val, list) or isinstance(val, DeclarativeMeta)):
+                try:
+                    type = obj._sa_class_manager[field].property.columns[0].type
+                    if hasattr(type, 'process_bind_param'):
+                            val = type.process_bind_param(val, '')
+                except Exception:
+                    pass            
             # If association proxies are embedded, their values must be copied
             # since they are garbage collected when Eve try to encode the
             # response.
