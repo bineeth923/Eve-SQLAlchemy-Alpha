@@ -16,11 +16,10 @@ import operator as sqla_op
 import re
 
 import sqlalchemy
-from eve.utils import str_to_date
+from eve.utils import str_to_date, config
 from sqlalchemy.ext.associationproxy import AssociationProxy
 from sqlalchemy.sql import expression as sqla_exp
-from weaver.core.model.schema import getattribute
-from flask import request
+from flask import request, current_app as app
 class ParseError(ValueError):
     pass
 
