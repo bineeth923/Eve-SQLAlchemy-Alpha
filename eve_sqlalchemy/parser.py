@@ -59,9 +59,14 @@ def parse_dictionary(filter_dict, model):
                 continue
             except (TypeError, ValueError):
                 raise ParseError("Can't parse expression '{0}'".format(v))
-
-        attr, v = getattribute(k,v,model)
-
+                
+        if config.CUSTOM_URL_LOGIC:
+            kwargs = {'attribute': [k], 'value': [v], 'model': model}
+            getattr(app, "custom_get_attribute_logic")(**kwargs)
+            attr = kwargs['attribute'][0]
+            v = kwargs['value'][0]
+        else:
+            attr, v = getattribute(k,v,model)
         if isinstance(attr, AssociationProxy):
             # If the condition is a dict, we must use 'any' method to match
             # objects' attributes.
