@@ -48,7 +48,7 @@ class SQLAResultCollection(object):
                     self._query = self._query.offset((self._page - 1) *
                                                      self._max_results)
         else:
-            self._count = 0
+            self._count = kwargs.get('total_count', 0)
 
     def __iter__(self):
         for i in self._query:
