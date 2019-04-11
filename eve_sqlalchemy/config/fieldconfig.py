@@ -5,6 +5,7 @@ import sqlalchemy.dialects.postgresql as postgresql
 from eve.exceptions import ConfigException
 from sqlalchemy import types
 from sqlalchemy.ext.declarative.api import DeclarativeMeta
+from sqlalchemy_utils import UUIDType
 
 
 class FieldConfig(object):
@@ -72,7 +73,7 @@ class ColumnFieldConfig(FieldConfig):
 
     def _get_field_maxlength(self):
         try:
-            return self._sqla_column.type.length
+            return 36 if isinstance(self._sqla_column.type, UUIDType) else self._sqla_column.type.length
         except AttributeError:
             return None
 
