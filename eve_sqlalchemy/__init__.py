@@ -178,7 +178,7 @@ class SQL(DataLayer):
         for document in doc_or_docs:
             model_instance = self._create_model_instance(resource, document)
             self.driver.session.add(model_instance)
-            self.driver.session.commit()
+            self.driver.session.flush()
             id_field = self._id_field(resource)
             document[id_field] = getattr(model_instance, id_field)
             rv.append(document[id_field])
@@ -252,7 +252,6 @@ class SQL(DataLayer):
             except AttributeError:
                 pass
         self.driver.session.add(model_instance)
-        self.driver.session.commit()
 
 
     def update(self, resource, id_, updates, original):
@@ -268,7 +267,6 @@ class SQL(DataLayer):
         attrs = self._get_model_attributes(resource, updates)
         for k, v in attrs.items():
             setattr(model_instance, k, v)
-        self.driver.session.commit()
 
     def _handle_immutable_id(self, id_field, original_instance, updates):
         if id_field in updates and \
@@ -291,6 +289,7 @@ class SQL(DataLayer):
         for item in query:
             self.driver.session.delete(item)
 
+    def commit(self):
         self.driver.session.commit()
 
     def _source(self, resource):
