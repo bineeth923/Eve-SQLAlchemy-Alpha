@@ -52,10 +52,7 @@ class SQLAResultCollection(object):
 
     def __iter__(self):
         for i in self._query:
-            if self._single_query_embedding:
-                yield custom_sqla_obj_to_dict(i, self)
-            else:
-                yield sqla_object_to_dict(i,self._fields)
+            yield custom_sqla_obj_to_dict(i, self)
 
     def count(self, **kwargs):
         return self._count
