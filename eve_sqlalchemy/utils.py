@@ -106,8 +106,8 @@ def _custom_sanitize_value(value, base_resource, embedded_till_now=None, resourc
                 return custom_sqla_obj_to_dict(value, fields=fields, resource=resource,
                                                embedded_till_now=embedded_till_now)
             else:
-                return _get_id(value)
-        return _get_id(value)
+                return _get_id(value, resource=resource)
+        return _get_id(value, resource=resource)
     elif isinstance(value, collections.Mapping):
         return dict([(k, _custom_sanitize_value(v, resource=resource, field=field, base_resource=config.BASE_RESOURCE,
                                                 embedded_till_now=embedded_till_now)) for k, v in value.items()])
@@ -193,8 +193,9 @@ def _sanitize_value(value):
         return copy.copy(value)
 
 
-def _get_id(obj):
-    resource = _get_resource(obj)
+def _get_id(obj, resource=None):
+    if not resource:
+        resource = _get_resource(obj)
     return getattr(obj, config.DOMAIN[resource]['id_field'])
 
 
