@@ -58,55 +58,59 @@ def parse_dictionary(filter_dict, model):
                 continue
             except (TypeError, ValueError):
                 raise ParseError("Can't parse expression '{0}'".format(v))
-                
-        if config.CUSTOM_URL_LOGIC:
-            kwargs = {'attribute': [k], 'value': [v], 'model': model}
-            getattr(app, "custom_get_attribute_logic")(**kwargs)
-            attr = kwargs['attribute'][0]
-            v = kwargs['value'][0]
-        else:
-            attr, v = getattribute(k,v,model)
-        if isinstance(attr, AssociationProxy):
-            # If the condition is a dict, we must use 'any' method to match
-            # objects' attributes.
-            if isinstance(v, dict):
-                conditions.append(attr.any(**v))
+        try:
+            if config.CUSTOM_URL_LOGIC:
+                kwargs = {'attribute': [k], 'value': [v], 'model': model}
+                getattr(app, "custom_get_attribute_logic")(**kwargs)
+                attr = kwargs['attribute'][0]
+                v = kwargs['value'][0]
             else:
-                conditions.append(attr.contains(v))
+                attr = getattr(model, k)
+            if isinstance(attr, AssociationProxy):
+                # If the condition is a dict, we must use 'any' method to match
+                # objects' attributes.
+                if isinstance(v, dict):
+                    conditions.append(attr.any(**v))
+                else:
+                    conditions.append(attr.contains(v))
 
-        elif (hasattr(attr, 'property') and
-              hasattr(attr.property, 'remote_side')):
-            relationship = attr.property
-            if relationship.primaryjoin is not None:
-                conditions.append(relationship.primaryjoin)
-            if relationship.secondaryjoin is not None:
-                conditions.append(relationship.secondaryjoin)
-            remote_column = list(relationship.remote_side)[0]
-            if relationship.uselist:
-                if callable(relationship.argument):
-                    mapper = relationship.argument().__mapper__
-                else:
-                    mapper = relationship.argument
-                remote_column = list(mapper.primary_key)[0]
-            conditions.append(sqla_op.eq(remote_column, v))
-        else:
-            try:
-                new_op, v = parse_sqla_operators(v)
-                attr_op = getattr(attr, new_op, None)
-                if attr_op is not None:
-                    # try a direct call to named operator on attribute class.
-                    new_filter = attr_op(v)
-                else:
-                    # try to call custom operator also called "generic"
-                    # operator in SQLAlchemy documentation.
-                    # cf. sqlalchemy.sql.operators.Operators.op()
-                    new_filter = attr.op(new_op)(v)
-            except (TypeError, ValueError):  # json/sql parse error
-                if isinstance(v, list):  # we have an array
-                    new_filter = attr.in_(v)
-                else:
-                    new_filter = sqla_op.eq(attr, v)
-            conditions.append(new_filter)
+            elif (hasattr(attr, 'property') and
+                  hasattr(attr.property, 'remote_side')):
+                relationship = attr.property
+                if relationship.primaryjoin is not None:
+                    conditions.append(relationship.primaryjoin)
+                if relationship.secondaryjoin is not None:
+                    conditions.append(relationship.secondaryjoin)
+                remote_column = list(relationship.remote_side)[0]
+                if relationship.uselist:
+                    if callable(relationship.argument):
+                        mapper = relationship.argument().__mapper__
+                    else:
+                        mapper = relationship.argument
+                    remote_column = list(mapper.primary_key)[0]
+                conditions.append(sqla_op.eq(remote_column, v))
+            else:
+                try:
+                    new_op, v = parse_sqla_operators(v)
+                    attr_op = getattr(attr, new_op, None)
+                    if attr_op is not None:
+                        # try a direct call to named operator on attribute class.
+                        new_filter = attr_op(v)
+                    else:
+                        # try to call custom operator also called "generic"
+                        # operator in SQLAlchemy documentation.
+                        # cf. sqlalchemy.sql.operators.Operators.op()
+                        new_filter = attr.op(new_op)(v)
+                except (TypeError, ValueError):  # json/sql parse error
+                    if isinstance(v, list):  # we have an array
+                        new_filter = attr.in_(v)
+                    else:
+                        new_filter = sqla_op.eq(attr, v)
+                conditions.append(new_filter)
+        except (AttributeError):
+            # Custom URL might not have any connections with the model which is being currently processed.
+            # Need a way to inform developer about this.
+            pass
     return conditions
 
 
