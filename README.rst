@@ -1,9 +1,6 @@
 Eve-SQLAlchemy extension
 ========================
 
-.. image:: https://travis-ci.org/pyeve/eve-sqlalchemy.svg?branch=master
-   :target: https://travis-ci.org/pyeve/eve-sqlalchemy
-
 Powered by Eve, SQLAlchemy and good intentions this extension allows
 to effortlessly build and deploy highly customizable, fully featured
 RESTful Web Services with SQL-based backends.
@@ -128,7 +125,7 @@ file (defaults to ``settings.py``) and a launch script.  Overall, you
 will find that configuring and fine-tuning your API is a very simple
 process.
 
-Eve-SQLAlchemy is thoroughly tested under Python 2.7-3.6 and PyPy.
+Eve-SQLAlchemy is thoroughly tested under Python 2.7 and PyPy.
 
 Documentation
 -------------
