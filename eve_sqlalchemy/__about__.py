@@ -6,7 +6,7 @@ __summary__ = 'REST API framework powered by Eve, SQLAlchemy and good ' \
 
 __url__ = 'https://github.com/bineeth923/Eve-SQLAlchemy-Alpha'
 
-__version__ = '0.6.1a'
+__version__ = '0.6.1'
 
 __author__ = 'Bineeth Mohan'
 __email__ = 'me@bineeth.in'
